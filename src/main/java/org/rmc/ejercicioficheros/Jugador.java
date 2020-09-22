@@ -9,23 +9,23 @@ public class Jugador implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int dorsal;
-    private char[] nombre;
-    private char[] apellidos;
+    private String nombre;
+    private String apellidos;
     private int demarcacion;
     private double salario;
 
     public Jugador() {
         dorsal = 0;
-        nombre = new char[16];
-        apellidos = new char[32];
+        nombre = null;
+        apellidos = null;
         demarcacion = 0;
         salario = 0.0;
     }
 
-    public Jugador(int dorsal, char[] nombre, char[] apellido, int demarcacion, double salario) {
+    public Jugador(int dorsal, String nombre, String apellidos, int demarcacion, double salario) {
         this.dorsal = dorsal;
         this.nombre = nombre;
-        this.apellidos = apellido;
+        this.apellidos = apellidos;
         this.demarcacion = demarcacion;
         this.salario = salario;
     }
@@ -38,20 +38,20 @@ public class Jugador implements Serializable {
         this.dorsal = dorsal;
     }
 
-    public char[] getNombre() {
+    public String getNombre() {
         return this.nombre;
     }
 
-    public void setNombre(char[] nombre) {
+    public void setNombre(String nombre) {
         this.nombre = nombre;
     }
 
-    public char[] getApellido() {
+    public String getApellidos() {
         return this.apellidos;
     }
 
-    public void setApellido(char[] apellido) {
-        this.apellidos = apellido;
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
     }
 
     public int getDemarcacion() {
