@@ -69,4 +69,12 @@ public class Jugador implements Serializable {
     public void setSalario(double salario) {
         this.salario = salario;
     }
+
+    @Override
+    public String toString() {
+        String[] demarc = {"base", "escolta", "alero", "ala pivot", "pivot"};
+        return "Dorsal: " + this.dorsal + "\nNombre: " + this.nombre + "\nApellidos: "
+                + this.apellidos + "\nDemarcación: " + demarc[this.demarcacion - 1] + "\nSalario: "
+                + this.salario + "\n\n";
+    }
 }

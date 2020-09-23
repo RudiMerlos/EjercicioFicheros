@@ -3,8 +3,10 @@ package org.rmc.ejercicioficheros;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -40,6 +42,10 @@ public class Main {
                 case 5:
                     break;
                 case 6:
+                    List<Jugador> list = listarJugadores();
+                    if (!list.isEmpty()) {
+                        list.forEach(System.out::println);
+                    }
                     break;
                 case 7:
                     break;
@@ -125,22 +131,9 @@ public class Main {
 
         try {
             RandomAccessFile file = new RandomAccessFile(ROOT + FILE, "rw");
-            if (file.length() > 0) {
-                int pos = (dorsal - 1) * SIZE;
-                file.seek(pos);
-                if (file.readInt() <= 0) {
-                    file.seek(pos);
-                    file.writeInt(dorsal);
-                    file.writeChars(nombre.toString());
-                    file.writeChars(apellidos.toString());
-                    file.writeInt(demarcacion);
-                    file.writeDouble(salario);
-                    System.out.println("\nJugador insertado con éxito!!");
-                }
-            } else {
-                System.out.println(
-                        "\nNo se ha podido insertar el jugador porque el dorsal ya esiste");
-            }
+
+            // TODO write file
+
             file.close();
         } catch (FileNotFoundException e) {
             System.err.println("\nError al abrir el fichero: " + e.getMessage());
@@ -201,7 +194,44 @@ public class Main {
      * @return List<Jugador>
      */
     private static List<Jugador> listarJugadores() {
-        return null;
+        Path path = Paths.get(ROOT, FILE);
+        List<Jugador> lista = new ArrayList<>();
+
+        if (!Files.exists(path)) {
+            System.err.println("\nNo existen jugadores en la base de datos.");
+        } else {
+            try {
+                RandomAccessFile file = new RandomAccessFile(path.toFile(), "r");
+
+                int pos = 0;
+                int dorsal, demarcacion;
+                char[] nombre = new char[16];
+                char[] apellidos = new char[32];
+                double salario;
+                while (pos < file.length()) {
+                    file.seek(pos);
+                    dorsal = file.readInt();
+                    if (dorsal > 0) {
+                        for (int i = 0; i < nombre.length; ++i) {
+                            nombre[i] = file.readChar();
+                        }
+                        for (int i = 0; i < apellidos.length; ++i) {
+                            apellidos[i] = file.readChar();
+                        }
+                        demarcacion = file.readInt();
+                        salario = file.readDouble();
+                        lista.add(new Jugador(dorsal, new String(nombre), new String(apellidos),
+                                demarcacion, salario));
+                    }
+                    pos += SIZE;
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return lista;
     }
 
 
