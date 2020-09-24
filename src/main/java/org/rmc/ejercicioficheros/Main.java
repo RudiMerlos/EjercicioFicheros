@@ -18,6 +18,9 @@ public class Main {
     // Nombre del fichero de acceso aleatorio que contendrá los jugadores
     private static final String FILE = "jugadores.dat";
 
+    // Fichero
+    private static final Path PATH = Paths.get(ROOT, FILE);
+
     // Tamaña en bytes de cada línea en el fichero de acceso aleatorio
     private static final int SIZE = 112;
 
@@ -25,6 +28,7 @@ public class Main {
 
     public static void main(String[] args) {
         int option = 0;
+        int dorsal;
 
         do {
             menu();
@@ -34,15 +38,32 @@ public class Main {
                     insertarJugador();
                     break;
                 case 2:
+                    System.out.print("\nDorsal: ");
+                    dorsal = sc.nextInt();
+                    Jugador jugador = datosJugador(dorsal);
+                    if (jugador != null) {
+                        System.out.println("\n" + jugador);
+                    } else {
+                        System.out.println("\nNo existe el jugador en la base de datos");
+                    }
                     break;
                 case 3:
                     break;
                 case 4:
                     break;
                 case 5:
+                    System.out.print("\nDorsal: ");
+                    dorsal = sc.nextInt();
+                    if (borrarJugador(dorsal)) {
+                        System.out.println("\nJugador eliminado");
+                    } else {
+                        System.out.println("\nNo se ha podido eliminar el jugador");
+                    }
                     break;
                 case 6:
                     List<Jugador> list = listarJugadores();
+                    System.out.println("\n  LISTA DE JUGADORES");
+                    System.out.println("----------------------");
                     if (!list.isEmpty()) {
                         list.forEach(System.out::println);
                     }
@@ -52,7 +73,7 @@ public class Main {
                 case 8:
                     break;
                 case 0:
-                    System.out.println("\nHASTA PRONTO!!!");
+                    System.out.println("\n¡¡¡HASTA PRONTO!!!");
                     break;
                 default:
                     System.out.println("Opción incorrecta");
@@ -88,6 +109,7 @@ public class Main {
      * Solicita los datos de un jugador y lo inserta en el fichero.
      */
     private static void insertarJugador() {
+        // Entrada de datos
         int dorsal;
         StringBuffer nombre;
         StringBuffer apellidos;
@@ -129,10 +151,34 @@ public class Main {
             salario = sc.nextDouble();
         }
 
+        // Escritura en fichero
         try {
-            RandomAccessFile file = new RandomAccessFile(ROOT + FILE, "rw");
+            RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "rw");
 
-            // TODO write file
+            int pos = (dorsal - 1) * SIZE;
+            file.seek(pos);
+
+            if (file.length() > 0) {
+                if (pos > file.length()) { // Si es el dorsal más alto
+                    file.setLength(pos + SIZE); // se dimensiona el fichero
+                } else {
+                    if (file.readInt() == dorsal) {
+                        System.out.println(
+                                "\nNo se ha podido insertar el jugador porque ya existe el dorsal "
+                                        + dorsal);
+                        file.close();
+                        return;
+                    }
+                    file.seek(pos); // Si no está ocupado el dorsal se vuelve a la posición
+                }
+            }
+
+            file.writeInt(dorsal);
+            file.writeChars(nombre.toString());
+            file.writeChars(apellidos.toString());
+            file.writeInt(demarcacion);
+            file.writeDouble(salario);
+            System.out.println("\nJugador insertado con éxito!");
 
             file.close();
         } catch (FileNotFoundException e) {
@@ -149,8 +195,42 @@ public class Main {
      * @param dorsal El dorsal del jugador del que se quieren obtener los datos.
      * @return Jugador null si no existe.
      */
-    private static Jugador datosJugador(int dorsal) {
-        return null;
+    private static Jugador datosJugador(int id) {
+        System.out.println("\n  DATOS DEL JUGADOR");
+        System.out.println("---------------------");
+        if (!Files.exists(PATH)) {
+            return null;
+        }
+
+        Jugador jugador = null;
+        try {
+            RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "r");
+            int pos = (id - 1) * SIZE;
+            if (pos < file.length() && pos > 0) {
+                file.seek(pos);
+                int dorsal;
+                if ((dorsal = file.readInt()) == id) {
+                    char[] nombre = new char[16];
+                    for (int i = 0; i < nombre.length; ++i) {
+                        nombre[i] = file.readChar();
+                    }
+                    char[] apellidos = new char[32];
+                    for (int i = 0; i < apellidos.length; ++i) {
+                        apellidos[i] = file.readChar();
+                    }
+                    int demarcacion = file.readInt();
+                    double salario = file.readDouble();
+                    jugador = new Jugador(dorsal, new String(nombre), new String(apellidos),
+                            demarcacion, salario);
+                }
+            }
+            file.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("\nFichero no encontrado: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("\nError de I/O: " + e.getMessage());
+        }
+        return jugador;
     }
 
 
@@ -172,7 +252,7 @@ public class Main {
      * @param dorsal El dorsal del jugador que se quiere modificar.
      * @return boolean
      */
-    private static boolean modificarJugador(int dorsal) {
+    private static boolean modificarJugador(int id) {
         return false;
     }
 
@@ -183,7 +263,31 @@ public class Main {
      * @param dorsal El dorsal del jugador que se quiere borrar.
      * @return boolean
      */
-    private static boolean borrarJugador(int dorsal) {
+    private static boolean borrarJugador(int id) {
+        System.out.println("\n  BORRAR JUGADOR");
+        System.out.println("------------------");
+        if (!Files.exists(PATH)) {
+            return false;
+        }
+
+        try {
+            RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "rw");
+            int pos = (id - 1) * SIZE;
+            if (pos < file.length() && pos > 0) {
+                file.seek(pos);
+                if (file.readInt() == id) {
+                    file.seek(pos);
+                    file.write(new byte[SIZE]);
+                    file.close();
+                    return true;
+                }
+            }
+            file.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("\nFichero no encontrado: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("\nError de I/O: " + e.getMessage());
+        }
         return false;
     }
 
@@ -194,14 +298,13 @@ public class Main {
      * @return List<Jugador>
      */
     private static List<Jugador> listarJugadores() {
-        Path path = Paths.get(ROOT, FILE);
         List<Jugador> lista = new ArrayList<>();
 
-        if (!Files.exists(path)) {
+        if (!Files.exists(PATH)) {
             System.err.println("\nNo existen jugadores en la base de datos.");
         } else {
             try {
-                RandomAccessFile file = new RandomAccessFile(path.toFile(), "r");
+                RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "r");
 
                 int pos = 0;
                 int dorsal, demarcacion;
@@ -226,9 +329,9 @@ public class Main {
                     pos += SIZE;
                 }
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                System.err.println("\nFichero no encontrado: " + e.getMessage());
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.println("\nError de I/O: " + e.getMessage());
             }
         }
         return lista;
