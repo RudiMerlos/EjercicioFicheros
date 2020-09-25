@@ -35,14 +35,18 @@ public class Main {
             option = sc.nextInt();
             switch (option) {
                 case 1:
+                    System.out.println("\n  NUEVO JUGADOR");
+                    System.out.println("-----------------");
                     insertarJugador();
                     break;
                 case 2:
+                    System.out.println("\n  DATOS DEL JUGADOR");
+                    System.out.println("---------------------");
                     System.out.print("\nDorsal: ");
                     dorsal = sc.nextInt();
-                    Jugador jugador = datosJugador(dorsal);
-                    if (jugador != null) {
-                        System.out.println("\n" + jugador);
+                    Jugador datosJugador = datosJugador(dorsal);
+                    if (datosJugador != null) {
+                        System.out.println("\n" + datosJugador);
                     } else {
                         System.out.println("\nNo existe el jugador en la base de datos");
                     }
@@ -50,8 +54,20 @@ public class Main {
                 case 3:
                     break;
                 case 4:
+                    System.out.println("\n  MODIFICAR JUGADOR");
+                    System.out.println("---------------------");
+                    System.out.print("\nDorsal: ");
+                    dorsal = sc.nextInt();
+                    Jugador modificaJugador = datosJugador(dorsal);
+                    if (modificaJugador != null) {
+                        modificarJugador(modificaJugador);
+                    } else {
+                        System.out.println("\nNo existe el jugador en la base de datos");
+                    }
                     break;
                 case 5:
+                    System.out.println("\n  BORRAR JUGADOR");
+                    System.out.println("------------------");
                     System.out.print("\nDorsal: ");
                     dorsal = sc.nextInt();
                     if (borrarJugador(dorsal)) {
@@ -116,8 +132,6 @@ public class Main {
         int demarcacion;
         double salario;
 
-        System.out.println("\n  NUEVO JUGADOR");
-        System.out.println("-----------------");
         System.out.print("Dorsal (1 - 99): ");
         dorsal = sc.nextInt();
         while (dorsal < 1 || dorsal > 99) {
@@ -152,8 +166,9 @@ public class Main {
         }
 
         // Escritura en fichero
+        RandomAccessFile file = null;
         try {
-            RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "rw");
+            file = new RandomAccessFile(PATH.toFile(), "rw");
 
             int pos = (dorsal - 1) * SIZE;
             file.seek(pos);
@@ -180,11 +195,18 @@ public class Main {
             file.writeDouble(salario);
             System.out.println("\nJugador insertado con éxito!");
 
-            file.close();
         } catch (FileNotFoundException e) {
             System.err.println("\nError al abrir el fichero: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("\nError de I/O: " + e.getMessage());
+        } finally {
+            if (file != null) {
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    System.err.println("\nError al cerrar el fichero: " + e.getMessage());
+                }
+            }
         }
     }
 
@@ -196,15 +218,14 @@ public class Main {
      * @return Jugador null si no existe.
      */
     private static Jugador datosJugador(int id) {
-        System.out.println("\n  DATOS DEL JUGADOR");
-        System.out.println("---------------------");
         if (!Files.exists(PATH)) {
             return null;
         }
 
         Jugador jugador = null;
+        RandomAccessFile file = null;
         try {
-            RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "r");
+            file = new RandomAccessFile(PATH.toFile(), "r");
             int pos = (id - 1) * SIZE;
             if (pos < file.length() && pos > 0) {
                 file.seek(pos);
@@ -224,11 +245,18 @@ public class Main {
                             demarcacion, salario);
                 }
             }
-            file.close();
         } catch (FileNotFoundException e) {
             System.err.println("\nFichero no encontrado: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("\nError de I/O: " + e.getMessage());
+        } finally {
+            if (file != null) {
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    System.err.println("\nError al cerrar el fichero: " + e.getMessage());
+                }
+            }
         }
         return jugador;
     }
@@ -252,8 +280,62 @@ public class Main {
      * @param dorsal El dorsal del jugador que se quiere modificar.
      * @return boolean
      */
-    private static boolean modificarJugador(int id) {
-        return false;
+    private static void modificarJugador(Jugador jugador) {
+        RandomAccessFile file = null;
+        try {
+            file = new RandomAccessFile(PATH.toFile(), "rw");
+            int pos = (jugador.getDorsal() - 1) * SIZE;
+            file.seek(pos + 4); // Posición del nombre
+
+            StringBuffer nombre;
+            StringBuffer apellidos;
+            int demarcacion;
+            double salario;
+
+            System.out.print("Nombre: ");
+            sc.nextLine(); // flush buffer
+            String str = sc.nextLine();
+            nombre = new StringBuffer(str);
+            nombre.setLength(16);
+
+            System.out.print("Apellidos: ");
+            str = sc.nextLine();
+            apellidos = new StringBuffer(str);
+            apellidos.setLength(32);
+
+            System.out.print(
+                    "Demarcación (1 – base, 2 – escolta, 3 – alero, 4 – ala pivot, 5 – pivot): ");
+            demarcacion = sc.nextInt();
+            while (demarcacion < 1 || demarcacion > 5) {
+                System.out.print("Introduzca una posición correcta: ");
+                demarcacion = sc.nextInt();
+            }
+
+            System.out.print("Sueldo: ");
+            salario = sc.nextDouble();
+            while (salario < 0) {
+                System.out.print("Introduzca un valor positivo: ");
+                salario = sc.nextDouble();
+            }
+
+            file.writeChars(nombre.toString());
+            file.writeChars(apellidos.toString());
+            file.writeInt(demarcacion);
+            file.writeDouble(salario);
+            System.out.println("\nJugador modificado con éxito!");
+        } catch (FileNotFoundException e) {
+            System.err.println("\nFichero no encontrado: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("\nError de I/O: " + e.getMessage());
+        } finally {
+            if (file != null) {
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    System.err.println("\nError al cerrar el fichero: " + e.getMessage());
+                }
+            }
+        }
     }
 
 
@@ -264,14 +346,13 @@ public class Main {
      * @return boolean
      */
     private static boolean borrarJugador(int id) {
-        System.out.println("\n  BORRAR JUGADOR");
-        System.out.println("------------------");
         if (!Files.exists(PATH)) {
             return false;
         }
 
+        RandomAccessFile file = null;
         try {
-            RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "rw");
+            file = new RandomAccessFile(PATH.toFile(), "rw");
             int pos = (id - 1) * SIZE;
             if (pos < file.length() && pos > 0) {
                 file.seek(pos);
@@ -282,11 +363,18 @@ public class Main {
                     return true;
                 }
             }
-            file.close();
         } catch (FileNotFoundException e) {
             System.err.println("\nFichero no encontrado: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("\nError de I/O: " + e.getMessage());
+        } finally {
+            if (file != null) {
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    System.err.println("\nError al cerrar el fichero: " + e.getMessage());
+                }
+            }
         }
         return false;
     }
@@ -303,8 +391,9 @@ public class Main {
         if (!Files.exists(PATH)) {
             System.err.println("\nNo existen jugadores en la base de datos.");
         } else {
+            RandomAccessFile file = null;
             try {
-                RandomAccessFile file = new RandomAccessFile(PATH.toFile(), "r");
+                file = new RandomAccessFile(PATH.toFile(), "r");
 
                 int pos = 0;
                 int dorsal, demarcacion;
@@ -332,6 +421,14 @@ public class Main {
                 System.err.println("\nFichero no encontrado: " + e.getMessage());
             } catch (IOException e) {
                 System.err.println("\nError de I/O: " + e.getMessage());
+            } finally {
+                if (file != null) {
+                    try {
+                        file.close();
+                    } catch (IOException e) {
+                        System.err.println("\nError al cerrar el fichero: " + e.getMessage());
+                    }
+                }
             }
         }
         return lista;
