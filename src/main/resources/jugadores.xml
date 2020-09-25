@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<listaJugadores>
+<equipo>
     <nombre>Baskonia</nombre>
     <localizacion>Vitoria</localizacion>
-    <equipo>
+    <jugadores>
         <jugador>
             <dorsal>3</dorsal>
             <nombre>Lucas</nombre>
@@ -66,5 +66,5 @@
             <demarcacion>4</demarcacion>
             <salario>3700.8</salario>
         </jugador>
-    </equipo>
-</listaJugadores>
+    </jugadores>
+</equipo>

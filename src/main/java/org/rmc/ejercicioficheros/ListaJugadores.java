@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlRootElement
+@XmlRootElement(name = "equipo")
 @XmlType(propOrder = {"nombre", "lugar", "lista"})
 public class ListaJugadores {
 
@@ -46,7 +46,7 @@ public class ListaJugadores {
         this.lugar = lugar;
     }
 
-    @XmlElementWrapper(name = "equipo")
+    @XmlElementWrapper(name = "jugadores")
     @XmlElement(name = "jugador")
     public List<Jugador> getLista() {
         return this.lista;
