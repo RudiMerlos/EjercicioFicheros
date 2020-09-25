@@ -5,15 +5,15 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
+@XmlType(propOrder = {"nombre", "lugar", "lista"})
 public class ListaJugadores {
 
     private String nombre;
     private String lugar;
 
-    @XmlElementWrapper(name = "equipo")
-    @XmlElement(name = "jugador")
     private List<Jugador> lista;
 
     public ListaJugadores() {
@@ -28,6 +28,7 @@ public class ListaJugadores {
         this.lista = lista;
     }
 
+    @XmlElement(name = "nombre")
     public String getNombre() {
         return this.nombre;
     }
@@ -36,6 +37,7 @@ public class ListaJugadores {
         this.nombre = nombre;
     }
 
+    @XmlElement(name = "localizacion")
     public String getLugar() {
         return this.lugar;
     }
@@ -44,6 +46,8 @@ public class ListaJugadores {
         this.lugar = lugar;
     }
 
+    @XmlElementWrapper(name = "equipo")
+    @XmlElement(name = "jugador")
     public List<Jugador> getLista() {
         return this.lista;
     }

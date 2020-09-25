@@ -1,14 +1,22 @@
 package org.rmc.ejercicioficheros;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Main {
 
@@ -29,17 +37,18 @@ public class Main {
     public static void main(String[] args) {
         int option = 0;
         int dorsal;
+        String file;
 
         do {
             menu();
             option = sc.nextInt();
             switch (option) {
-                case 1:
+                case 1: // INSERTAR JUGADOR
                     System.out.println("\n  NUEVO JUGADOR");
                     System.out.println("-----------------");
-                    insertarJugador();
+                    insertarJugador(introducirDatosJugador());
                     break;
-                case 2:
+                case 2: // MOSTRAR DATOS DE JUGADOR
                     System.out.println("\n  DATOS DEL JUGADOR");
                     System.out.println("---------------------");
                     System.out.print("\nDorsal: ");
@@ -51,9 +60,15 @@ public class Main {
                         System.out.println("\nNo existe el jugador en la base de datos");
                     }
                     break;
-                case 3:
+                case 3: // IMPORTAR DESDE CSV
+                    System.out.println("\n  IMPORTAR JUGADORES DESDE CSV");
+                    System.out.println("--------------------------------");
+                    System.out.print("Fichero CSV: ");
+                    sc.nextLine(); // flush buffer
+                    file = sc.nextLine();
+                    importarCSV(Paths.get(ROOT, file));
                     break;
-                case 4:
+                case 4: // MODIFICAR JUGADOR
                     System.out.println("\n  MODIFICAR JUGADOR");
                     System.out.println("---------------------");
                     System.out.print("\nDorsal: ");
@@ -65,7 +80,7 @@ public class Main {
                         System.out.println("\nNo existe el jugador en la base de datos");
                     }
                     break;
-                case 5:
+                case 5: // BORRAR JUGADOR
                     System.out.println("\n  BORRAR JUGADOR");
                     System.out.println("------------------");
                     System.out.print("\nDorsal: ");
@@ -76,19 +91,31 @@ public class Main {
                         System.out.println("\nNo se ha podido eliminar el jugador");
                     }
                     break;
-                case 6:
-                    List<Jugador> list = listarJugadores();
+                case 6: // LISTAR JUGADORES
                     System.out.println("\n  LISTA DE JUGADORES");
                     System.out.println("----------------------");
+                    List<Jugador> list = listarJugadores();
                     if (!list.isEmpty()) {
                         list.forEach(System.out::println);
                     }
                     break;
-                case 7:
+                case 7: // EXPORTAR A XML
+                    System.out.println("\n  EXPORTAR A XML");
+                    System.out.println("------------------");
+                    System.out.print("Fichero XML: ");
+                    sc.nextLine(); // flush buffer
+                    file = sc.nextLine();
+                    exportarXML(Paths.get(ROOT, file));
                     break;
-                case 8:
+                case 8: // EXPORTAR A JSON
+                    System.out.println("\n  EXPORTAR A JSON");
+                    System.out.println("-------------------");
+                    System.out.print("Fichero JSON: ");
+                    sc.nextLine(); // flush buffer
+                    file = sc.nextLine();
+                    exportarJSON(Paths.get(ROOT, file));
                     break;
-                case 0:
+                case 0: // SALIR
                     System.out.println("\n¡¡¡HASTA PRONTO!!!");
                     break;
                 default:
@@ -120,12 +147,12 @@ public class Main {
         System.out.print("  ? ");
     }
 
-
     /**
-     * Solicita los datos de un jugador y lo inserta en el fichero.
+     * Permite introducir los datos de un jugador.
+     *
+     * @return El objeto Jugador
      */
-    private static void insertarJugador() {
-        // Entrada de datos
+    private static Jugador introducirDatosJugador() {
         int dorsal;
         StringBuffer nombre;
         StringBuffer apellidos;
@@ -165,34 +192,41 @@ public class Main {
             salario = sc.nextDouble();
         }
 
-        // Escritura en fichero
+        return new Jugador(dorsal, new String(nombre), new String(apellidos), demarcacion, salario);
+    }
+
+
+    /**
+     * Solicita los datos de un jugador y lo inserta en el fichero.
+     */
+    private static void insertarJugador(Jugador jugador) {
         RandomAccessFile file = null;
         try {
             file = new RandomAccessFile(PATH.toFile(), "rw");
 
-            int pos = (dorsal - 1) * SIZE;
+            int pos = (jugador.getDorsal() - 1) * SIZE;
             file.seek(pos);
 
             if (file.length() > 0) {
                 if (pos > file.length()) { // Si es el dorsal más alto
                     file.setLength(pos + SIZE); // se dimensiona el fichero
                 } else {
-                    if (file.readInt() == dorsal) {
+                    if (file.readInt() == jugador.getDorsal()) {
                         System.out.println(
                                 "\nNo se ha podido insertar el jugador porque ya existe el dorsal "
-                                        + dorsal);
+                                        + jugador.getDorsal());
                         file.close();
                         return;
                     }
-                    file.seek(pos); // Si no está ocupado el dorsal se vuelve a la posición
+                    file.seek(pos); // Si no está ocupado el dorsal, se vuelve a la posición
                 }
             }
 
-            file.writeInt(dorsal);
-            file.writeChars(nombre.toString());
-            file.writeChars(apellidos.toString());
-            file.writeInt(demarcacion);
-            file.writeDouble(salario);
+            file.writeInt(jugador.getDorsal());
+            file.writeChars(jugador.getNombre());
+            file.writeChars(jugador.getApellidos());
+            file.writeInt(jugador.getDemarcacion());
+            file.writeDouble(jugador.getSalario());
             System.out.println("\nJugador insertado con éxito!");
 
         } catch (FileNotFoundException e) {
@@ -269,7 +303,28 @@ public class Main {
      * @param file Fichero CSV
      */
     private static void importarCSV(Path file) {
+        if (!Files.exists(file)) {
+            System.err.println("\nNo existe el fichero " + file.toString());
+            return;
+        }
 
+        try {
+            BufferedReader reader = Files.newBufferedReader(file);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] jug = line.split(",");
+                StringBuffer nombre = new StringBuffer(jug[1]);
+                nombre.setLength(16);
+                StringBuffer apellidos = new StringBuffer(jug[2]);
+                apellidos.setLength(32);
+                insertarJugador(new Jugador(Integer.parseInt(jug[0]), nombre.toString(),
+                        apellidos.toString(), Integer.parseInt(jug[3]),
+                        Double.parseDouble(jug[4])));
+            }
+            reader.close();
+        } catch (IOException e) {
+            System.err.println("\nError de I/O: " + e.getMessage());
+        }
     }
 
 
@@ -412,8 +467,8 @@ public class Main {
                         }
                         demarcacion = file.readInt();
                         salario = file.readDouble();
-                        lista.add(new Jugador(dorsal, new String(nombre), new String(apellidos),
-                                demarcacion, salario));
+                        lista.add(new Jugador(dorsal, new String(nombre).trim(),
+                                new String(apellidos).trim(), demarcacion, salario));
                     }
                     pos += SIZE;
                 }
@@ -441,7 +496,22 @@ public class Main {
      * @param file El fichero XML al cual se quieren exportar los jugadores.
      */
     private static void exportarXML(Path file) {
+        System.out.print("Nombre del equipo: ");
+        String equipo = sc.nextLine();
+        System.out.print("Localización: ");
+        String lugar = sc.nextLine();
+        ListaJugadores jugadores = new ListaJugadores(equipo, lugar, listarJugadores());
 
+        try {
+            JAXBContext context = JAXBContext.newInstance(ListaJugadores.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(jugadores, Files.newOutputStream(file));
+        } catch (JAXBException e) {
+            System.err.println("\nError al parsear: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("\nError de escritura: " + e.getMessage());
+        }
     }
 
 
@@ -451,6 +521,20 @@ public class Main {
      * @param file El fichero JSON al cual se quieren exportar los jugadores.
      */
     private static void exportarJSON(Path file) {
+        System.out.print("Nombre del equipo: ");
+        String equipo = sc.nextLine();
+        System.out.print("Localización: ");
+        String lugar = sc.nextLine();
+        ListaJugadores jugadores = new ListaJugadores(equipo, lugar, listarJugadores());
 
+        try {
+            BufferedWriter writer = Files.newBufferedWriter(file, StandardOpenOption.CREATE);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String json = gson.toJson(jugadores);
+            writer.write(json, 0, json.length());
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("\nError de escritura: " + e.getMessage());
+        }
     }
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<listaJugadores>
+    <nombre>Baskonia</nombre>
+    <localizacion>Vitoria</localizacion>
+    <equipo>
+        <jugador>
+            <dorsal>3</dorsal>
+            <nombre>Lucas</nombre>
+            <apellidos>Palacios Pérez</apellidos>
+            <demarcacion>2</demarcacion>
+            <salario>3400.25</salario>
+        </jugador>
+        <jugador>
+            <dorsal>5</dorsal>
+            <nombre>Martín</nombre>
+            <apellidos>Gómez Corberó</apellidos>
+            <demarcacion>3</demarcacion>
+            <salario>2900.45</salario>
+        </jugador>
+        <jugador>
+            <dorsal>6</dorsal>
+            <nombre>José Ramón</nombre>
+            <apellidos>Gutiérrez Sanz</apellidos>
+            <demarcacion>4</demarcacion>
+            <salario>3000.0</salario>
+        </jugador>
+        <jugador>
+            <dorsal>7</dorsal>
+            <nombre>Ernesto</nombre>
+            <apellidos>Salas Díaz</apellidos>
+            <demarcacion>5</demarcacion>
+            <salario>3606.5</salario>
+        </jugador>
+        <jugador>
+            <dorsal>8</dorsal>
+            <nombre>Miguel Ángel</nombre>
+            <apellidos>Sánchez Riquelme</apellidos>
+            <demarcacion>1</demarcacion>
+            <salario>2800.0</salario>
+        </jugador>
+        <jugador>
+            <dorsal>9</dorsal>
+            <nombre>Ricardo</nombre>
+            <apellidos>Moreno Asensio</apellidos>
+            <demarcacion>5</demarcacion>
+            <salario>4100.0</salario>
+        </jugador>
+        <jugador>
+            <dorsal>15</dorsal>
+            <nombre>José Juan</nombre>
+            <apellidos>Roncero Sastre</apellidos>
+            <demarcacion>3</demarcacion>
+            <salario>2500.0</salario>
+        </jugador>
+        <jugador>
+            <dorsal>17</dorsal>
+            <nombre>Julián</nombre>
+            <apellidos>Jiménez Pastor</apellidos>
+            <demarcacion>1</demarcacion>
+            <salario>2980.75</salario>
+        </jugador>
+        <jugador>
+            <dorsal>23</dorsal>
+            <nombre>Julio</nombre>
+            <apellidos>Alarcón García</apellidos>
+            <demarcacion>4</demarcacion>
+            <salario>3700.8</salario>
+        </jugador>
+    </equipo>
+</listaJugadores>

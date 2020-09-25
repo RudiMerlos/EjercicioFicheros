@@ -1,0 +1,69 @@
+{
+  "nombre": "Baskonia",
+  "lugar": "Vitoria",
+  "lista": [
+    {
+      "dorsal": 3,
+      "nombre": "Lucas",
+      "apellidos": "Palacios Pérez",
+      "demarcacion": 2,
+      "salario": 3400.25
+    },
+    {
+      "dorsal": 5,
+      "nombre": "Martín",
+      "apellidos": "Gómez Corberó",
+      "demarcacion": 3,
+      "salario": 2900.45
+    },
+    {
+      "dorsal": 6,
+      "nombre": "José Ramón",
+      "apellidos": "Gutiérrez Sanz",
+      "demarcacion": 4,
+      "salario": 3000.0
+    },
+    {
+      "dorsal": 7,
+      "nombre": "Ernesto",
+      "apellidos": "Salas Díaz",
+      "demarcacion": 5,
+      "salario": 3606.5
+    },
+    {
+      "dorsal": 8,
+      "nombre": "Miguel Ángel",
+      "apellidos": "Sánchez Riquelme",
+      "demarcacion": 1,
+      "salario": 2800.0
+    },
+    {
+      "dorsal": 9,
+      "nombre": "Ricardo",
+      "apellidos": "Moreno Asensio",
+      "demarcacion": 5,
+      "salario": 4100.0
+    },
+    {
+      "dorsal": 15,
+      "nombre": "José Juan",
+      "apellidos": "Roncero Sastre",
+      "demarcacion": 3,
+      "salario": 2500.0
+    },
+    {
+      "dorsal": 17,
+      "nombre": "Julián",
+      "apellidos": "Jiménez Pastor",
+      "demarcacion": 1,
+      "salario": 2980.75
+    },
+    {
+      "dorsal": 23,
+      "nombre": "Julio",
+      "apellidos": "Alarcón García",
+      "demarcacion": 4,
+      "salario": 3700.8
+    }
+  ]
+}
